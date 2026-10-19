@@ -14,7 +14,6 @@ html,body{height:100%;margin:0;background:#e6dac7;overflow:hidden;-webkit-tap-hi
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
 .credit{position:fixed;left:0;right:0;bottom:8px;text-align:center;font:italic 500 13px "Cormorant Garamond",serif;color:#8a7360;z-index:2}
 .credit a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(138,115,96,.35)}
-/* tombol musik (satu-satunya tambahan) */
 #musicBtn{
   position:fixed;top:14px;right:14px;z-index:5;
   width:44px;height:44px;border-radius:50%;
@@ -57,20 +56,21 @@ const CONFIG = {
   ],
   lastTitle: P.get("lastTitle") || "you just need me",
   last: P.get("last") || "I'm always here.",
-  sign: P.get("sign") || "Someone Who Loves You",
+  sign: P.get("sign") || "Someone Who Loves You",   // ← tanda tangan amplop 1-4
+  lastSign: P.get("lastSign") || "Andriy",          // ← tanda tangan amplop terakhir
   papers: ["#e9d3b4", "#dcbfb1", "#cfd2bb", "#d6c6a8", "#f1e6d2"],
   wax: "#9e1f27",
   openSecs: 2.3, closeSecs: .9,
 };
 
-// ===== musik (a.mp3) + tombol pause/play =====
+// ===== musik (tulus.mp3) + tombol pause/play =====
 const bgm = document.getElementById("bgm");
 const musicBtn = document.getElementById("musicBtn");
 let userPaused = false;
 function updateBtn(){ musicBtn.classList.toggle("paused", bgm.paused); }
 function tryPlay(){
   if (userPaused) return;
-  bgm.volume = 0.55;                    // ← atur volume di sini (0.0 – 1.0)
+  bgm.volume = 0.55;
   const p = bgm.play();
   if (p && p.catch) p.catch(()=>{});
 }
@@ -272,6 +272,7 @@ function letter(e, w, h, write, hearts) {
   const ink = "#33241c"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
   let total = 0; const ch = n => { const v = Math.max(0, Math.min(n.length, Math.floor(write*count - total))); total += n.length; return n.slice(0, v); };
   if (!e.last) {
+    // ===== amplop 1-4: pakai CONFIG.sign =====
     const fs = e.fs, lhh = fs*1.22; let y = top + pad + fs*.62;
     var count = e.title.length + 12 + CONFIG.name.length + e.lines.join("").length + CONFIG.sign.length + 3;
     ctx.strokeStyle = "rgba(150,110,80,.16)"; ctx.lineWidth = 1;
@@ -289,13 +290,14 @@ function letter(e, w, h, write, hearts) {
     ctx.textAlign = "right"; ctx.font = `600 ${fs*1.02}px ${HAND}`; const sw2 = ctx.measureText("— " + CONFIG.sign).width; ctx.textAlign = "left";
     heartPath(ctx, x0 + lw - pad*1.1 - sw2 - fs*.55, y - fs*.32, fs*.3, clamp(hearts*1.6 - .6)); ctx.stroke();
   } else {
-    const fs = e.big; var count = ("open when " + e.title).length + CONFIG.name.length + 1 + e.lines.join("").length + CONFIG.sign.length + 2;
+    // ===== amplop terakhir: pakai CONFIG.lastSign =====
+    const fs = e.big; var count = ("open when " + e.title).length + CONFIG.name.length + 1 + e.lines.join("").length + CONFIG.lastSign.length + 2;
     const mid = top + Math.max(pad, (room - fs*(1.3 + e.lines.length*1.05))/2) + fs*.4;
     ctx.textAlign = "center"; ctx.fillStyle = "rgba(51,36,28,.6)"; ctx.font = `italic 600 ${fs*.24}px ${SERIF}`;
     ctx.fillText(ch("open when " + e.title), 0, mid - fs*.25);
     ctx.fillStyle = ink; ctx.font = `700 ${fs*.78}px ${HAND}`; ctx.fillText(ch(CONFIG.name + ","), 0, mid + fs*.62);
     ctx.font = `700 ${fs}px ${HAND}`; e.lines.forEach((l, i) => ctx.fillText(ch(l), 0, mid + fs*(1.55 + i*1.02)));
-    ctx.font = `600 ${fs*.36}px ${HAND}`; ctx.fillStyle = "rgba(51,36,28,.8)"; ctx.fillText(ch("— " + CONFIG.sign), 0, mid + fs*(1.6 + e.lines.length*1.02) + fs*.3);
+    ctx.font = `600 ${fs*.36}px ${HAND}`; ctx.fillStyle = "rgba(51,36,28,.8)"; ctx.fillText(ch("— " + CONFIG.lastSign), 0, mid + fs*(1.6 + e.lines.length*1.02) + fs*.3);
     ctx.lineWidth = 2; ctx.lineCap = ctx.lineJoin = "round"; ctx.strokeStyle = shade(CONFIG.wax, .1);
     const sy = mid + fs*(1.6 + e.lines.length*1.02) + fs*.3;
     const hs = [[-.36, top + pad*1.4, .1], [.36, top + pad*1.2, .13], [-.37, mid + fs*.35, .065], [.37, mid + fs*.3, .08], [0, sy + fs*.7, .055]];
